@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#e0e5ec">
+<link rel="manifest" href="manifest.json"><link rel="icon" href="icon.svg">
+<title>Tiffin Tracker</title>
+<style>
+:root{--bg:#e0e5ec;--tx:#3d4852;--sub:#7b8794;--s1:#a3b1c6;--s2:#fff;--ok:#2e9e6b;--no:#d9534f;--ac:#5b7bd5}
+body.dark{--bg:#2a2d34;--tx:#e4e7ec;--sub:#9aa3b0;--s1:#1b1d22;--s2:#393d47}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.4 system-ui,sans-serif;min-height:100dvh}
+#app{max-width:480px;margin:auto;padding:calc(12px + env(safe-area-inset-top)) 16px 110px}
+header{display:flex;justify-content:space-between;align-items:center}
+h1,h2,h3{margin:0}h1{font-size:30px}h2{font-size:19px}h3{font-size:22px}
+small,.sub{color:var(--sub);font-size:13px}
+button{font:inherit;color:var(--tx);background:var(--bg);border:0;border-radius:14px;padding:11px 14px;cursor:pointer;box-shadow:5px 5px 10px var(--s1),-5px -5px 10px var(--s2)}
+button:active,button.act{box-shadow:inset 3px 3px 6px var(--s1),inset -3px -3px 6px var(--s2)}
+.card{background:var(--bg);border-radius:20px;padding:16px;margin:0 0 16px}
+.raise{box-shadow:6px 6px 12px var(--s1),-6px -6px 12px var(--s2)}
+.press{box-shadow:inset 5px 5px 10px var(--s1),inset -5px -5px 10px var(--s2)}
+.center{text-align:center}.wide{width:100%;margin-top:10px}
+.row{display:flex;gap:10px;margin:14px 0}.row>*{flex:1}.between{align-items:center;justify-content:space-between}.between>h2{flex:2;text-align:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.meals{display:grid;gap:14px;margin:16px 0}
+.meal{display:flex;align-items:center;gap:12px;padding:18px;border-radius:20px;text-align:left;width:100%}
+.meal .em{font-size:26px}.meal b{flex:1}.meal small{color:inherit;opacity:.85}
+.meal.on{box-shadow:inset 5px 5px 10px var(--s1),inset -5px -5px 10px var(--s2);color:var(--ok)}
+.meal.off{box-shadow:inset 5px 5px 10px var(--s1),inset -5px -5px 10px var(--s2);color:var(--no)}
+.note{padding:10px 14px;border-radius:14px;margin-top:10px;color:var(--ac);box-shadow:inset 3px 3px 6px var(--s1),inset -3px -3px 6px var(--s2)}
+.cg{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:14px 0}.wd{font-style:normal;text-align:center;color:var(--sub);font-size:13px}
+.day{padding:8px 0;border-radius:12px;font-size:14px;box-shadow:3px 3px 6px var(--s1),-3px -3px 6px var(--s2)}
+.day span{display:flex;gap:2px;justify-content:center;margin-top:4px}
+u{width:6px;height:6px;border-radius:50%;background:var(--s1);opacity:.5}u.on{background:var(--ok);opacity:1}u.off{background:var(--no);opacity:1}
+.day.tk{color:var(--ac);font-weight:700}
+.okc{color:var(--ok)}.noc{color:var(--no)}.danger{color:var(--no)}
+input{width:100%;padding:12px 14px;border:0;border-radius:12px;background:var(--bg);color:var(--tx);font:inherit;margin:6px 0 10px;outline:0;box-shadow:inset 3px 3px 6px var(--s1),inset -3px -3px 6px var(--s2)}
+input[type=checkbox]{width:22px;height:22px;margin:0}
+label{display:block;font-size:13px;color:var(--sub)}label.sw{display:flex;justify-content:space-between;align-items:center;font-size:15px;color:var(--tx)}
+.sec{margin:16px 0}.sec>b{display:block;margin-bottom:6px}
+.pay{display:flex;align-items:center;gap:10px;padding:10px 0}.pay span{flex:1}.pay small{display:block}.pay button{padding:6px 10px}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;gap:12px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--bg)}
+nav button{flex:1;padding:13px 0}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:flex-end;justify-content:center;z-index:5}.ov.show{display:flex}
+#mbody{background:var(--bg);width:100%;max-width:480px;max-height:88dvh;overflow:auto;border-radius:24px 24px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom))}
+#dlg{align-items:center;z-index:9}.box{width:86%;max-width:340px;margin:0}
+#toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:10px 16px;border-radius:14px;display:none;z-index:10;font-size:14px}
+</style></head><body>
+<div id="app"><header><h1>Tiffin Tracker</h1><button data-a="set" aria-label="Settings">⚙️</button></header><main id="main"></main></div>
+<nav><button data-t="today">Today</button><button data-t="cal">Calendar</button><button data-t="pay">Payments</button></nav>
+<div class="ov" id="modal"><div id="mbody"></div></div><div class="ov" id="dlg"></div><div id="toast"></div>
+<input type="file" id="fc" accept=".txt,text/plain" hidden><input type="file" id="fb" accept=".json,application/json" hidden>
+<script>
+const $=s=>document.querySelector(s),K='tiffin_v1',MS=['b','l','d'],NM={b:'Breakfast',l:'Lunch',d:'Dinner'},EM={b:'🌅',l:'🍱',d:'🌙'};
+const p2=n=>String(n).padStart(2,'0'),dk=d=>d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate()),pk=k=>{const a=k.split('-');return new Date(+a[0],a[1]-1,+a[2])};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),rs=n=>'₹'+n;
+const def=()=>({prices:{b:40,l:40,d:40},name:'Manish',days:{},pays:[],dark:matchMedia('(prefers-color-scheme:dark)').matches});
+function load(){try{const s=JSON.parse(localStorage.getItem(K));if(s&&s.days){const d=def();return{...d,...s,prices:{...d.prices,...s.prices}}}}catch(e){}return def()}
+function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){toast('Could not save data')}}
+let S=load(),payOpen=false,pr=false,tab='today',md=null,pend=null,cal={y:new Date().getFullYear(),m:new Date().getMonth()};
+const ent=(k,m)=>(S.days[k]||{})[m];
+function setM(k,m,s){const d=S.days[k]=S.days[k]||{};if(s==null)delete d[m];else d[m]={s,p:d[m]?d[m].p:S.prices[m]};if(!Object.keys(d).length)delete S.days[k]}
+function cyc(k,m){const e=ent(k,m);setM(k,m,!e?1:e.s===1?0:null);save();render()}
+function all(k,s){MS.forEach(m=>setM(k,m,s));save();render()}
+function sum(pre){let t=0,c=0;for(const k in S.days)if(k.startsWith(pre))for(const m in S.days[k]){const e=S.days[k][m];if(e.s){t+=e.p;c++}}return{t,c}}
+function cards(k){return MS.map(m=>{const e=ent(k,m);return `<button class="meal ${!e?'':e.s?'on':'off'}" data-a="cyc" data-k="${k}" data-m="${m}"><span class="em">${EM[m]}</span><b>${NM[m]}</b><small>${!e?'':e.s?'Taken · '+rs(e.p):'Skipped'}</small></button>`}).join('')}
+function vToday(){const n=new Date(),k=dk(n);
+return `<h2 style="margin-top:18px">${n.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</h2><div class="meals">${cards(k)}</div><div class="row"><button data-a="all" data-k="${k}" data-s="1">All taken</button><button data-a="all" data-k="${k}" data-s="0">Skip day</button><button data-a="clr" data-k="${k}">Clear</button></div>`}
+function vCal(){const{y,m}=cal,f=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),pre=y+'-'+p2(m+1),tk=dk(new Date());
+let g=['S','M','T','W','T','F','S'].map(x=>`<i class="wd">${x}</i>`).join('')+'<i></i>'.repeat(f);
+for(let d=1;d<=dim;d++){const k=pre+'-'+p2(d);g+=`<button class="day ${k===tk?'tk':''}" data-a="day" data-k="${k}">${d}<span>${MS.map(x=>{const e=ent(k,x);return `<u class="${!e?'':e.s?'on':'off'}"></u>`}).join('')}</span></button>`}
+return `<div class="row between" style="margin-top:18px"><button data-a="mo" data-d="-1">‹</button><h2>${new Date(y,m,1).toLocaleDateString('en-IN',{month:'long',year:'numeric'})}</h2><button data-a="mo" data-d="1">›</button></div><div class="cg">${g}</div>`}
+function vPay(){const pn=sum('').t-S.pays.reduce((a,p)=>a+p.a,0);
+return `<div class="card press center" style="margin-top:18px"><small>Pending</small><h1 class="${pn>0?'noc':'okc'}">${rs(pn)}</h1></div>${payOpen?'<div class="card raise"><input id="pa" type="number" inputmode="decimal" placeholder="Amount paid (₹)"><input id="pn" placeholder="Note"><div class="row" style="margin-bottom:0"><button data-a="addp">Cancel</button><button data-a="savep">Save</button></div></div>':'<button class="wide" style="margin:0 0 18px" data-a="addp">Add payment</button>'}<h3>History</h3>${S.pays.length?[...S.pays].sort((a,b)=>b.d.localeCompare(a.d)||b.i-a.i).map(p=>`<div class="pay"><span>${p.d}<small>${esc(p.n||'')}</small></span><b>${rs(p.a)}</b><button data-a="delp" data-i="${p.i}">✕</button></div>`).join(''):''}`}
+function setHtml(){return `<h3>Settings</h3><div class="sec"><button class="wide ${pr?'act':''}" style="margin:0" data-a="tp">Meal prices</button>${pr?`<div class="grid3" style="margin-top:14px">${MS.map(m=>`<label>${NM[m]}<input type="number" inputmode="decimal" data-p="${m}" value="${S.prices[m]}"></label>`).join('')}</div>`:''}</div>
+<div class="sec"><label>Your name in the chat<input id="sn" value="${esc(S.name)}"></label></div>
+<div class="sec"><label class="sw"><span>Dark theme</span><input type="checkbox" id="dm" ${S.dark?'checked':''}></label></div>
+<div class="sec"><button class="wide" style="margin:0" data-a="imc">Import WhatsApp chat</button></div>
+<div class="sec"><button class="wide" style="margin:0" data-a="csv">Export</button><div class="row"><button data-a="exp">Backup</button><button data-a="imb">Restore</button></div></div>
+<button class="wide danger" data-a="reset">Reset all data</button><button class="wide" data-a="close">Close</button>`}
+function prevHtml(){const p=pend;return `<h3>Import preview</h3><div class="card press" style="margin-top:14px"><p><b>${p.n}</b> days found: ${p.n-p.gap} in the chat, ${p.gap} with no post (marked skipped)</p><p>Taken: ${p.c.b} breakfast, ${p.c.l} lunch, ${p.c.d} dinner = <b>${rs(p.amt)}</b></p>${p.conf.length?`<label class="sw"><span>Overwrite ${p.conf.length} day(s) you already set</span><input type="checkbox" id="ow"></label>`:''}</div><div class="row"><button data-a="close">Cancel</button><button data-a="applyc">Import</button></div>`}
+function mHtml(){return md.t==='day'?`<h3>${pk(md.k).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</h3><div class="meals">${cards(md.k)}</div><button class="wide" data-a="close">Done</button>`:md.t==='set'?setHtml():prevHtml()}
+function showM(){$('#mbody').innerHTML=mHtml();$('#modal').classList.add('show')}
+function closeM(){md=null;$('#modal').classList.remove('show')}
+function render(){document.body.classList.toggle('dark',S.dark);$('#main').innerHTML=({today:vToday,cal:vCal,pay:vPay})[tab]();document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('act',b.dataset.t===tab));if(md&&md.t==='day')$('#mbody').innerHTML=mHtml()}
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2800)}
+function ask(msg,ok){return new Promise(r=>{const d=$('#dlg');d.innerHTML=`<div class="box card raise"><p>${msg}</p><div class="row"><button id="dn">Cancel</button><button id="dy" class="danger">${ok}</button></div></div>`;d.classList.add('show');$('#dn').onclick=()=>{d.classList.remove('show');r(false)};$('#dy').onclick=()=>{d.classList.remove('show');r(true)}})}
+const MN=['january','february','march','april','may','june','july','august','september','october','november','december'];
+function parseChat(t){const out={},rx=new RegExp('(^|[^a-z])'+S.name.trim().replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'([^a-z]|$)','i'),hd=/^(\d{1,2})\/(\d{1,2})\/(\d{2,4}),\s[^-]*-\s(?:[^:]+:\s?)?/;let yr=0,day=null,meal=null;
+const go=l=>{l=l.trim();if(!l){meal=null;return}const s=l.replace(/\*/g,'').trim(),dm=s.match(/^(\d{1,2})\s+([A-Za-z]+)\b/),mm=s.match(/^(breakfast|lunch|dinner)/i);
+if(dm){const w=dm[2].toLowerCase(),i=MN.findIndex(n=>n===w||n.slice(0,3)===w);if(i>-1){day=yr+'-'+p2(i+1)+'-'+p2(dm[1]);out[day]={b:0,l:0,d:0};meal=null;return}}
+if(mm){meal=mm[1][0].toLowerCase();return}if(meal&&day&&rx.test(s))out[day][meal]=1};
+t.split(/\r?\n/).forEach(l=>{const h=l.match(hd);if(h){yr=+h[3]<100?2000+ +h[3]:+h[3];day=null;meal=null;go(l.slice(h[0].length))}else go(l)});return out}
+function openPrev(t){const raw=parseChat(t),ks=Object.keys(raw).sort();if(!ks.length){toast('No meal days found in this file');return}
+const al={...raw},z=pk(ks[ks.length-1]);let gap=0;for(const d=pk(ks[0]);d<=z;d.setDate(d.getDate()+1)){const k=dk(d);if(!al[k]){al[k]={b:0,l:0,d:0};gap++}}
+const c={b:0,l:0,d:0},conf=[];let amt=0;for(const k in al){MS.forEach(m=>{if(al[k][m]){c[m]++;amt+=S.prices[m]}});if(MS.some(m=>{const e=ent(k,m);return e&&e.s!==al[k][m]}))conf.push(k)}
+pend={al,gap,c,amt,conf,n:Object.keys(al).length};md={t:'prev'};showM()}
+document.addEventListener('click',async e=>{const t=e.target.closest('[data-t]');if(t){tab=t.dataset.t;render();return}
+if(e.target.id==='modal'){closeM();return}const b=e.target.closest('[data-a]');if(!b)return;const d=b.dataset;
+switch(d.a){
+case'cyc':cyc(d.k,d.m);break;case'all':all(d.k,+d.s);break;case'clr':all(d.k,null);break;
+case'day':md={t:'day',k:d.k};showM();break;case'mo':cal.m+=+d.d;if(cal.m>11){cal.m=0;cal.y++}if(cal.m<0){cal.m=11;cal.y--}render();break;
+case'addp':payOpen=!payOpen;render();break;
+case'tp':pr=!pr;showM();break;
+case'savep':{const a=parseFloat($('#pa').value);if(!(a>0)){toast('Enter an amount above 0');break}S.pays.push({i:Date.now(),d:dk(new Date()),a,n:$('#pn').value.trim()});payOpen=false;save();render();toast('Payment added');break}
+case'delp':if(await ask('Delete this payment?','Delete')){S.pays=S.pays.filter(p=>p.i!==+d.i);save();render()}break;
+case'set':pr=false;md={t:'set'};showM();break;case'close':closeM();break;
+case'imc':$('#fc').click();break;case'imb':$('#fb').click();break;
+case'applyc':{const ow=$('#ow')&&$('#ow').checked;for(const k in pend.al){if(pend.conf.includes(k)&&!ow)continue;MS.forEach(m=>{const v=pend.al[k][m],x=ent(k,m);if(!x||x.s!==v)setM(k,m,v)})}save();closeM();render();toast('Chat imported');break}
+case'csv':{const ks=Object.keys(S.days).sort();if(!ks.length){toast('No meals to export');break}
+const rows=[['Date','Breakfast','Lunch','Dinner','Total']],z=pk(ks[ks.length-1]);
+for(const q=pk(ks[0]);q<=z;q.setDate(q.getDate()+1)){const x=S.days[dk(q)]||{};let t=0;const c=MS.map(m=>{const e=x[m];if(e&&e.s){t+=e.p;return'✅'}return'❌'});rows.push([p2(q.getDate())+'/'+p2(q.getMonth()+1)+'/'+q.getFullYear(),...c,'₹'+t])}
+const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+rows.map(r=>r.join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}));a.download='tiffin-export-'+dk(new Date())+'.csv';a.click();break}
+case'exp':{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:'application/json'}));a.download='tiffin-backup-'+dk(new Date())+'.json';a.click();break}
+case'reset':if(await ask('Delete ALL meals, payments and settings? This cannot be undone.','Delete everything')){S=def();save();closeM();render();toast('All data reset')}break}});
+document.addEventListener('change',e=>{const t=e.target;
+if(t.dataset.p){S.prices[t.dataset.p]=Math.max(0,parseFloat(t.value)||0);save();return}
+if(t.id==='sn'){S.name=t.value.trim()||'Manish';save()}
+if(t.id==='dm'){S.dark=t.checked;save();render()}
+if(t.id==='fc'&&t.files[0]){const r=new FileReader();r.onload=()=>openPrev(String(r.result));r.readAsText(t.files[0]);t.value=''}
+if(t.id==='fb'&&t.files[0]){const r=new FileReader();r.onload=async()=>{try{const j=JSON.parse(r.result);if(!j.days||!j.prices)throw 0;if(await ask('Replace all current data with this backup?','Restore')){S={...def(),...j};save();closeM();render();toast('Backup restored')}}catch(x){toast('This is not a valid backup file')}};r.readAsText(t.files[0]);t.value=''}});
+render();
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('service-worker.js').catch(()=>{}));
+</script></body></html>
